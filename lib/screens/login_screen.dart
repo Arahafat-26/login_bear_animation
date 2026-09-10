@@ -9,6 +9,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  //Control para mostrar/ocultar contraseña
+  bool _obscure = true;
   @override
   Widget build(BuildContext context) {
     //para obtener el tamaño de la pantalla
@@ -23,7 +25,46 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: size.width,
                 height: 200,
                 child: RiveAnimation.asset('login-bear.riv'),
-              )
+              ),
+              //para separar espacios
+              SizedBox(height:10),
+              //Campo de texto para email
+              TextField(
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: 'Email',
+                  prefixIcon: const Icon(Icons.email),
+                  border: OutlineInputBorder(
+                    //para redondear los bordes
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              //Campo de texto para contraseña
+                TextField(
+                  obscureText: _obscure,
+                decoration: InputDecoration(
+                  hintText: 'Contraseña',
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    //if operador ternario
+                    icon: Icon(
+                      _obscure ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: (){
+                      //Refrescar el icono
+                      setState(() {
+                        _obscure = !_obscure;
+                      });
+                    }, 
+                    ),
+                  border: OutlineInputBorder(
+                    //para redondear los bordes
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
             ],
           ),
           ),
