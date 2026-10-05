@@ -13,6 +13,10 @@ class _LoginScreenState extends State<LoginScreen> {
   //Control para mostrar/ocultar contraseña
   bool _obscure = true;
 
+  //Estado de 'Remember me' y bandera para protección anti-spam
+  bool _rememberMe = false;
+  bool _isToggleLocked = false;
+
   //1.1 crear el cerebro de la animacion
   StateMachineController? _controller;
   //SMI: State MAchine Input/ enrrada de maquina de estado
@@ -48,6 +52,25 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isValidPassword(String pass){
     final re = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$',);
     return re.hasMatch(pass);
+  }
+
+  void _onToggleRememberMe() {
+    //Si la animación sigue en curso, se rechazan toques adicionales
+    if (_isToggleLocked) return;
+
+    setState(() {
+      _isToggleLocked = true;// Activa el bloqueo
+      _rememberMe = !_rememberMe;
+    });
+
+    // Se libera el bloqueo al terminar la duración de la animación visual
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _isToggleLocked = false;
+        });
+      }
+    });
   }
 
   //4.4 dar accion al boton
@@ -237,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 10),
+                /*SizedBox(height: 10),
                 //4.12 texto olvide la contraseña
                 SizedBox(
                   width: size.width,
@@ -248,7 +271,72 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(decoration: TextDecoration.underline)
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 10),*/
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IgnorePointer(
+                      ignoring: _isToggleLocked,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: _onToggleRememberMe,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                width: 44,
+                                height: 24,
+                                padding: const EdgeInsets.symmetric(horizontal: 2),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: _rememberMe
+                                      ? Colors.pinkAccent
+                                      : Colors.grey.shade400,
+                                ),
+                                child: AnimatedAlign(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  alignment: _rememberMe
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Remember me',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      'Forgot password?',
+                      style: TextStyle(
+                        fontSize: 13,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 //4.13 boton de login
                 MaterialButton(
                   minWidth: size.width,
