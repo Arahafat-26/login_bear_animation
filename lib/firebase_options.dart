@@ -51,11 +51,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBCX4X7jk_K2LOwEFbyB-URYBU46PpAyXs',
-    appId: '1:1053231165409:android:4e3c1f31d6096f38682ca0',
-    messagingSenderId: '1053231165409',
-    projectId: 'rive-login-app',
-    storageBucket: 'rive-login-app.firebasestorage.app',
+    apiKey: 'AIzaSyB-awCJhpO1lvLu7dWqIH-bRPeJQgI1AZE',
+    appId: '1:383482591639:android:fe192b68217b6487002cd2',
+    messagingSenderId: '383482591639',
+    projectId: 'proyecto2-moviles-6bd38',
+    storageBucket: 'proyecto2-moviles-6bd38.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

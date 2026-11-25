@@ -76,80 +76,80 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-// 4.4 Dar acción al botón (Ahora conectado a Firebase)
-  Future<void> _onLogin() async {
+Future<void> _onLogin() async {
     final email = _emailCtrl.text.trim();
     final pass = _passCtrl.text;
 
-    // 4.6 Evaluar errores locales (Regex)
-    final eError = isValidEmail(email) ? null : "Email inválido";
-    final pError = isValidPassword(pass) ? null : "Contraseña inválida";
-
+    // Limpiamos errores por campo para no revelar cuál falló
     setState(() {
-      emailError = eError;
-      passError = pError;
+      emailError = null;
+      passError = null;
     });
 
-    // 4.8 Cerrar el teclado y bajar las manos
+    // 1. Bajamos las manos y cerramos el teclado
     FocusScope.of(context).unfocus();
     _typingdebounce?.cancel();
     _isChecking?.change(false);
     _isHandsUp?.change(false);
     _numLook?.value = 50.0;
 
-    // Si hay errores de formato, disparamos Fail y detenemos el proceso
-    if (eError != null || pError != null) {
-      _trigFail?.fire();
-      return; // No ejecutamos Firebase si el formato está mal
+    // Si hay errores de formato locales, mostramos el mismo error genérico
+    if (!isValidEmail(email) || !isValidPassword(pass)) {
+      Future.delayed(const Duration(milliseconds: 400), () {
+        _trigFail?.fire();
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al iniciar sesión.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
     }
 
     // --- INTEGRACIÓN CON FIREBASE ---
     try {
-      // Intentamos iniciar sesión con los datos del usuario
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: pass,
       );
 
-      // Si pasa la línea anterior sin error, ¡el inicio de sesión fue exitoso!
-      _trigSuccess?.fire();
-      // Esperamos 2 segundos para que el osito termine de celebrar y cambiamos de pantalla
-  Future.delayed(const Duration(seconds: 2), () {
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-    }
-  });
-      
-      // Mostramos un mensajito verde abajo
+      // Si todo sale bien, esperamos 400ms y disparamos la celebración
+      Future.delayed(const Duration(milliseconds: 400), () {
+        _trigSuccess?.fire();
+      });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('¡Inicio de sesión exitoso!'), 
-            backgroundColor: Colors.green
+            content: Text('¡Inicio de sesión exitoso!'),
+            backgroundColor: Colors.green,
           ),
         );
       }
 
-    } on FirebaseAuthException catch (e) {
-      // Si Firebase rechaza los datos (contraseña mal, no existe, etc.)
-      _trigFail?.fire();
-      
-      String errorMsg = 'Error al iniciar sesión';
-      if (e.code == 'user-not-found') {
-        errorMsg = 'No se encontró un usuario con este correo.';
-      } else if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
-        errorMsg = 'Contraseña incorrecta.';
-      }
+      // Esperamos 2 segundos a que celebre y lo mandamos al Home
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      });
+    } on FirebaseAuthException catch (_) {
+      // Si Firebase rechaza los datos, disparamos el fallo y mostramos error genérico
+      Future.delayed(const Duration(milliseconds: 400), () {
+        _trigFail?.fire();
+      });
 
-      // Mostramos un mensajito rojo con el error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMsg), 
-            backgroundColor: Colors.red
+          const SnackBar(
+            content: Text('Error al iniciar sesión.'),
+            backgroundColor: Colors.red,
           ),
         );
       }
